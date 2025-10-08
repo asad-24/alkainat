@@ -130,7 +130,7 @@ export const demoCoursesData = [
         rating: 4.8,
         students: 95,
         color: "var(--chart-5)"
-    }, heelo
+    },
     {
         id: 6,
         title: "Digital Marketing",
