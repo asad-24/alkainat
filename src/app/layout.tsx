@@ -14,8 +14,8 @@ const GeistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Team Portal',
-  description: "It's basically a starter kit as it've properly setup with prettier, eslint, shadcn ui, tailwindcss, husky."
+  title: 'Education Portal',
+  description: 'An online education platform offering courses, resources, and tools for learners and educators.',
 };
 
 // Analytics component (you can create this later or remove if not needed)
