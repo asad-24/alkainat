@@ -15,7 +15,7 @@ export function generateDemoImage(
         english: 300,
         technology: 400,
         programming: 500,
-        web: 600,
+        web: 601,
 
         // Teacher images
         teacher1: 700,
@@ -130,7 +130,7 @@ export const demoCoursesData = [
         rating: 4.8,
         students: 95,
         color: "var(--chart-5)"
-    },
+    }, heelo
     {
         id: 6,
         title: "Digital Marketing",
