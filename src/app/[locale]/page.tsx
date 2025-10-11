@@ -6,6 +6,8 @@ import { getDatabase } from "@/lib/mongodb-alt"
 import type { Locale } from "@/lib/i18n/config"
 import type { Course } from "@/models/types"
 
+export const dynamic = 'force-dynamic'
+
 async function getFeaturedCourses(): Promise<Course[]> {
     try {
         const db = await getDatabase()
