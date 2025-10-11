@@ -2,8 +2,31 @@ import Link from "next/link"
 import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Users, Clock, Globe, Star, ChevronRight, Sparkles, Zap } from "lucide-react"
-import { demoCoursesData } from "@/lib/demo-data"
+import { getDatabase } from "@/lib/mongodb"
 import type { Locale } from "@/lib/i18n/config"
+import type { Course } from "@/models/types"
+
+async function getFeaturedCourses(): Promise<Course[]> {
+    try {
+        const db = await getDatabase()
+        const coursesCollection = db.collection('courses')
+        const courses = await coursesCollection
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .toArray()
+
+        return courses.map(course => ({
+            ...course,
+            _id: course._id?.toString(),
+            createdAt: course.createdAt,
+            updatedAt: course.updatedAt
+        })) as Course[]
+    } catch (error) {
+        console.error('Error fetching courses:', error)
+        return []
+    }
+}
 
 export default async function HomePage({
     params,
@@ -12,6 +35,7 @@ export default async function HomePage({
 }) {
     const { locale } = await params
     const dict = await getDictionary(locale)
+    const featuredCourses = await getFeaturedCourses()
 
     return (
         <div>
@@ -234,15 +258,15 @@ export default async function HomePage({
                         </Button>
                     </div>
                     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                        {demoCoursesData.slice(0, 3).map((course, index) => (
+                        {featuredCourses.map((course, index) => (
                             <article
-                                key={course.id}
+                                key={course._id || index}
                                 className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300 border border-white/10 group shadow-xl hover:shadow-2xl hover:border-white/20"
                             >
                                 <div className="relative overflow-hidden">
                                     <img
                                         alt={course.title}
-                                        src={course.image}
+                                        src={course.image || '/placeholder-course.jpg'}
                                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
                                     <div className="absolute top-4 right-4">
@@ -322,8 +346,8 @@ export default async function HomePage({
                             <div
                                 key={i}
                                 className={`absolute rounded-full animate-twinkle ${i % 3 === 0 ? 'w-1 h-1 bg-cyan-400/40' :
-                                        i % 3 === 1 ? 'w-0.5 h-0.5 bg-purple-400/50' :
-                                            'w-0.5 h-0.5 bg-white/30'
+                                    i % 3 === 1 ? 'w-0.5 h-0.5 bg-purple-400/50' :
+                                        'w-0.5 h-0.5 bg-white/30'
                                     }`}
                                 style={{
                                     left: `${Math.random() * 100}%`,

@@ -7,8 +7,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-
-
+  serverExternalPackages: ['mongodb'],
 }
 
 module.exports = nextConfig;

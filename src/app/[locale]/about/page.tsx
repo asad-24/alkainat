@@ -3,7 +3,6 @@ import { TeachersGrid } from "@/components/teachers-grid"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BookOpen, Users, Globe, Award, Heart, Target, Star, GraduationCap } from "lucide-react"
-import { demoTeachersData } from "@/lib/demo-data"
 import type { Locale } from "@/lib/i18n/config"
 
 export default async function AboutPage({
@@ -45,7 +44,7 @@ export default async function AboutPage({
                 </div>
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">About Al-Kainat</h1>
+                        <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">About Al-Kainaat</h1>
                         <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
                             {dict.about.description}
                         </p>

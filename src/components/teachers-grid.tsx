@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Star, Users, BookOpen, Award } from "lucide-react"
-import { demoTeachersData } from "@/lib/demo-data"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { Locale } from "@/lib/i18n/config"
+import type { Teacher } from "@/models/types"
 
 export function TeachersGrid({
     locale,
@@ -15,27 +16,61 @@ export function TeachersGrid({
     locale: Locale
     dict: any
 }) {
-    const [active, setActive] = useState<(typeof demoTeachersData)[0] | null>(null)
+    const [teachers, setTeachers] = useState<Teacher[]>([])
+    const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        async function fetchTeachers() {
+            try {
+                const response = await fetch('/api/teachers/list')
+                if (response.ok) {
+                    const data = await response.json()
+                    setTeachers(data.teachers || [])
+                }
+            } catch (error) {
+                console.error('Error fetching teachers:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchTeachers()
+    }, [])
+
+    const openTeacherModal = (teacher: Teacher) => {
+        setSelectedTeacher(teacher)
+        setIsModalOpen(true)
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            </div>
+        )
+    }
 
     return (
         <>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {demoTeachersData.map((teacher) => (
+                {teachers.map((teacher) => (
                     <Card
-                        key={teacher.id}
+                        key={String(teacher._id) || teacher.name}
                         className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300 group cursor-pointer overflow-hidden"
-                        onClick={() => setActive(teacher)}
+                        onClick={() => openTeacherModal(teacher)}
                     >
                         <div className="relative overflow-hidden">
                             <img
                                 alt={teacher.name}
-                                src={teacher.image}
+                                src={teacher.avatar || '/placeholder-teacher.jpg'}
                                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                             <div className="absolute top-4 right-4">
                                 <div className="flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
                                     <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                                    <span className="text-xs text-white font-medium">{teacher.rating}</span>
+                                    <span className="text-xs text-white font-medium">{teacher.rating || 5.0}</span>
                                 </div>
                             </div>
                         </div>
@@ -45,7 +80,7 @@ export function TeachersGrid({
                                 {teacher.name}
                             </h3>
                             <p className="text-[var(--accent)] text-sm font-medium mb-3">
-                                {teacher.specialization}
+                                Subject: {teacher.subject}
                             </p>
 
                             <div className="space-y-2 mb-4">
@@ -54,21 +89,17 @@ export function TeachersGrid({
                                         <Award className="h-4 w-4" />
                                         <span>{teacher.experience}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <BookOpen className="h-4 w-4" />
-                                        <span>{teacher.courses} courses</span>
+
+                                    <div>
+                                        For: {teacher.gender}
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-white/70">
-                                    <Users className="h-4 w-4" />
-                                    <span>{teacher.students} students taught</span>
                                 </div>
                             </div>
 
                             <Button
                                 variant="outline"
                                 className="w-full bg-white/20 hover:bg-white/30 text-white border-white/30"
-                                onClick={() => setActive(teacher)}
+                                onClick={() => openTeacherModal(teacher)}
                             >
                                 View Profile
                             </Button>
@@ -77,76 +108,121 @@ export function TeachersGrid({
                 ))}
             </div>
 
-            {/* Teacher Modal */}
-            {active && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-                    onClick={() => setActive(null)}
-                >
-                    <Card
-                        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="relative">
-                            <img
-                                alt={active.name}
-                                src={active.image}
-                                className="w-full h-64 object-cover"
-                            />
+            {/* Teacher Details Modal */}
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="max-w-4xl h-[85vh] bg-slate-900/95 backdrop-blur-xl border-white/10 overflow-hidden flex flex-col">
+                    <DialogHeader className="flex-shrink-0 border-b border-white/10 pb-4">
+                        <div className="flex items-center justify-between">
+                            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                                {selectedTeacher?.name}
+                            </DialogTitle>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="absolute top-4 right-4 bg-black/50 text-white hover:bg-black/70"
-                                onClick={() => setActive(null)}
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-white hover:bg-white/10"
                             >
                                 <X className="h-4 w-4" />
                             </Button>
-                            <div className="absolute bottom-4 left-4">
-                                <div className="flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
-                                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                                    <span className="text-white font-medium">{active.rating}</span>
-                                </div>
-                            </div>
                         </div>
+                    </DialogHeader>
 
-                        <div className="p-6">
-                            <h2 className="text-2xl font-bold mb-2">{active.name}</h2>
-                            <p className="text-[var(--chart-2)] font-semibold mb-4">{active.specialization}</p>
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        {selectedTeacher && (
+                            <>
+                                {/* Teacher Image */}
+                                <div className="relative rounded-xl overflow-hidden">
+                                    <img
+                                        src={selectedTeacher.avatar || '/placeholder-teacher.jpg'}
+                                        alt={selectedTeacher.name}
+                                        className="w-full h-64 object-cover"
+                                    />
+                                    <div className="absolute top-4 left-4">
+                                        <span className="text-white px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-purple-500 to-cyan-500">
+                                            {selectedTeacher.subject}
+                                        </span>
+                                    </div>
+                                    <div className="absolute top-4 right-4">
+                                        <div className="flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
+                                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                                            <span className="text-white font-medium">{selectedTeacher.rating || 5.0}</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div className="grid grid-cols-3 gap-4 mb-6">
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-[var(--chart-2)]">{active.courses}</div>
-                                    <div className="text-sm text-muted-foreground">Courses</div>
+                                {/* Teacher Info */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                        <div className="flex items-center text-gray-300 mb-2">
+                                            <Award className="h-5 w-5 mr-2 text-purple-400" />
+                                            <span className="font-medium">Experience</span>
+                                        </div>
+                                        <p className="text-white font-semibold">{selectedTeacher.experience}</p>
+                                    </div>
+                                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                        <div className="flex items-center text-gray-300 mb-2">
+                                            <BookOpen className="h-5 w-5 mr-2 text-green-400" />
+                                            <span className="font-medium">Subject</span>
+                                        </div>
+                                        <p className="text-white font-semibold">{selectedTeacher.subject}</p>
+                                    </div>
                                 </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-[var(--chart-2)]">{active.students}</div>
-                                    <div className="text-sm text-muted-foreground">Students</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-[var(--chart-2)]">{active.experience}</div>
-                                    <div className="text-sm text-muted-foreground">Experience</div>
-                                </div>
-                            </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="font-semibold mb-2">About</h3>
-                                    <p className="text-muted-foreground leading-relaxed">{active.bio}</p>
+                                {/* Teacher Bio */}
+                                <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                                    <h3 className="text-xl font-semibold text-white mb-4">About {selectedTeacher.name}</h3>
+                                    <p className="text-gray-300 leading-relaxed">{selectedTeacher.bio}</p>
                                 </div>
-                            </div>
 
-                            <div className="flex gap-3 mt-6">
-                                <Button className="flex-1 bg-[var(--chart-2)] hover:bg-[var(--chart-2)]/90">
-                                    View Courses
-                                </Button>
-                                <Button variant="outline" className="flex-1">
-                                    Contact Teacher
-                                </Button>
-                            </div>
-                        </div>
-                    </Card>
-                </div>
-            )}
+                                {/* Education */}
+                                {selectedTeacher.degrees && selectedTeacher.degrees.length > 0 && (
+                                    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                                        <h3 className="text-xl font-semibold text-white mb-4">Education</h3>
+                                        <div className="space-y-3">
+                                            {selectedTeacher.degrees.map((degree, index) => (
+                                                <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                                    <div>
+                                                        <p className="text-white font-medium">{degree.degree}</p>
+                                                        <p className="text-gray-400 text-sm">{degree.university}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Languages */}
+                                {selectedTeacher.languages && selectedTeacher.languages.length > 0 && (
+                                    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                                        <h3 className="text-xl font-semibold text-white mb-4">Languages</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedTeacher.languages.map((language, index) => (
+                                                <Badge key={index} variant="secondary" className="bg-purple-500/20 text-purple-200 border-purple-500/40 hover:bg-purple-500/30">
+                                                    {language}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Backgrounds */}
+                                {selectedTeacher.backgrounds && selectedTeacher.backgrounds.length > 0 && (
+                                    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                                        <h3 className="text-xl font-semibold text-white mb-4">Specializations</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedTeacher.backgrounds.map((background, index) => (
+                                                <Badge key={index} variant="secondary" className="bg-emerald-500/20 text-emerald-200 border-emerald-500/40 hover:bg-emerald-500/30">
+                                                    {background}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

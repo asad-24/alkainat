@@ -56,7 +56,7 @@ export default function LoadingSpinner({
             {showLogo && (
                 <div className="text-center">
                     <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent">
-                        Al-Kainat
+                        Al-Kaainat
                     </h1>
                     <p className="text-gray-400 text-xs mt-1">Learning & Development Institute</p>
                 </div>

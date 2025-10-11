@@ -27,43 +27,6 @@ const en = {
         links: "Links",
         contact: "Contact",
     },
-    sampleCourses: [
-        {
-            title: "Quran Recitation (Tajweed)",
-            desc: "Learn proper pronunciation and recitation rules.",
-            imageAlt: "Quran study",
-            level: "Beginner",
-            duration: "8 weeks",
-        },
-        {
-            title: "Arabic for Beginners",
-            desc: "Build foundations in reading, writing, and speaking.",
-            imageAlt: "Arabic language",
-            level: "Beginner",
-            duration: "10 weeks",
-        },
-        {
-            title: "English Communication",
-            desc: "Improve speaking, listening, and vocabulary.",
-            imageAlt: "English learning",
-            level: "Intermediate",
-            duration: "6 weeks",
-        },
-        {
-            title: "Computer Basics",
-            desc: "Essential computer skills for daily productivity.",
-            imageAlt: "Computer basics",
-            level: "Beginner",
-            duration: "6 weeks",
-        },
-        {
-            title: "Web Development Essentials",
-            desc: "HTML, CSS, and JavaScript fundamentals.",
-            imageAlt: "Web development",
-            level: "Intermediate",
-            duration: "12 weeks",
-        },
-    ],
     teachers: [
         {
             id: "t1",

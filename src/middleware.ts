@@ -5,6 +5,43 @@ const locales = ['en', 'ar', 'ur'];
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Admin routes protection
+  if (pathname.startsWith('/admin')) {
+    // Allow login page without authentication
+    if (pathname === '/admin/login') {
+      return NextResponse.next();
+    }
+
+    // Check admin authentication
+    const adminToken = req.cookies.get('admin-token')?.value;
+
+    if (!adminToken) {
+      return NextResponse.redirect(new URL('/admin/login', req.url));
+    }
+
+    // Validate admin token
+    try {
+      const decoded = JSON.parse(Buffer.from(adminToken, 'base64').toString());
+      const loginTime = new Date(decoded.loginTime);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - loginTime.getTime()) / (1000 * 60 * 60);
+
+      // Token expired (24 hours)
+      if (hoursDiff > 24) {
+        const response = NextResponse.redirect(new URL('/admin/login', req.url));
+        response.cookies.delete('admin-token');
+        return response;
+      }
+    } catch (error) {
+      // Invalid token
+      const response = NextResponse.redirect(new URL('/admin/login', req.url));
+      response.cookies.delete('admin-token');
+      return response;
+    }
+
+    return NextResponse.next();
+  }
+
   // Check if the pathname starts with a locale
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
