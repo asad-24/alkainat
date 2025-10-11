@@ -2,7 +2,7 @@ import Link from "next/link"
 import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Users, Clock, Globe, Star, ChevronRight, Sparkles, Zap } from "lucide-react"
-import { getDatabase } from "@/lib/mongodb"
+import { getDatabase } from "@/lib/mongodb-alt"
 import type { Locale } from "@/lib/i18n/config"
 import type { Course } from "@/models/types"
 
