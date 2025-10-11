@@ -1,52 +1,39 @@
 import { MongoClient, Db } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-    throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
-}
+const uri = process.env.MONGODB_URI!;
+const dbName = process.env.MONGODB_DB || 'alkainaat_learning_institute';
 
-const uri = process.env.MONGODB_URI;
-
-// Alternative MongoDB connection with Node.js crypto and SSL handling
+// MongoDB connection options
 const options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 30000,
-    connectTimeoutMS: 30000,
-    socketTimeoutMS: 30000,
     maxPoolSize: 10,
-    minPoolSize: 5,
-    retryWrites: true,
-    ssl: true,
-    sslValidate: true,
-    directConnection: false
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    bufferMaxEntries: 0,
+    bufferCommands: false,
 };
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === 'development') {
-    const globalWithMongo = global as typeof globalThis & {
-        _mongoClientPromise?: Promise<MongoClient>;
-    };
-
-    if (!globalWithMongo._mongoClientPromise) {
-        client = new MongoClient(uri, options);
-        globalWithMongo._mongoClientPromise = client.connect();
-    }
-    clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
-}
-
-export default clientPromise;
+let cachedClient: MongoClient | null = null;
+let cachedDb: Db | null = null;
 
 export async function getDatabase(): Promise<Db> {
+    // Return cached database if available
+    if (cachedDb) {
+        return cachedDb;
+    }
+
     try {
-        const client = await clientPromise;
-        return client.db(process.env.MONGODB_DB || 'alkainaat_learning_institute');
+        // Create new client if not cached
+        if (!cachedClient) {
+            cachedClient = new MongoClient(uri, options);
+        }
+
+        // Connect and cache the database
+        const client = await cachedClient.connect();
+        cachedDb = client.db(dbName);
+
+        return cachedDb;
     } catch (error) {
-        console.error('MongoDB connection failed (alternative method):', error);
+        console.error('MongoDB connection error:', error);
         throw error;
     }
 }

@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { getDatabase } from '@/lib/mongodb';
+import { getDatabase } from '@/lib/mongodb-alt';
 import { Admin } from '@/models/types';
 
 export async function createFirstAdmin() {

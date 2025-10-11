@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/mongodb';
+import { getDatabase } from '@/lib/mongodb-alt';
 import { Course } from '@/models/types';
 import { requireAdmin } from '@/lib/auth-utils';
 import { ObjectId } from 'mongodb';

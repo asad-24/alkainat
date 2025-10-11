@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getDatabase } from '@/lib/mongodb';
+import { getDatabase } from '@/lib/mongodb-alt';
 
 export async function POST() {
+    // Prevent execution during build time
+    if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
+        return NextResponse.json({
+            success: false,
+            error: 'Database not configured'
+        }, { status: 500 });
+    }
+
     try {
         const db = await getDatabase();
         const adminsCollection = db.collection('admins');

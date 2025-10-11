@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/mongodb';
+import { getDatabase } from '@/lib/mongodb-alt';
 import { requireAdmin } from '@/lib/auth-utils';
 
 export async function GET(req: NextRequest) {
