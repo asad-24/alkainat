@@ -4,8 +4,8 @@ import { getDatabase } from "@/lib/mongodb-alt"
 import type { Course } from "@/models/types"
 import dynamic from "next/dynamic"
 
-// Enable ISR with 5 minute revalidation
-export const revalidate = 300
+// Enable ISR with 10 minute revalidation
+export const revalidate = 600
 
 // Dynamically import CoursesClient to reduce initial bundle size
 const CoursesClient = dynamic(() => import("./CoursesClient"), {
@@ -19,6 +19,20 @@ async function getCourses(): Promise<Course[]> {
         const courses = await coursesCollection
             .find({})
             .sort({ createdAt: -1 })
+            .project({
+                _id: 1,
+                title: 1,
+                description: 1,
+                details: 1,
+                instructor: 1,
+                level: 1,
+                duration: 1,
+                image: 1,
+                interestingStudents: 1,
+                color: 1,
+                createdAt: 1,
+                updatedAt: 1
+            })
             .toArray()
 
         return courses.map(course => ({

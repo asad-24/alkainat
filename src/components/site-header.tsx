@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { useState, useTransition, useEffect } from "react"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,7 +40,15 @@ export function SiteHeader({
     dict: any
 }) {
     const pathname = usePathname()
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
+    const [isPending, startTransition] = useTransition()
+    const [activeNav, setActiveNav] = useState<string | null>(null)
+
+    useEffect(() => {
+        // Reset active nav when navigation completes
+        setActiveNav(null)
+    }, [pathname])
 
     const nav = [
         { href: `/${locale}`, label: dict.nav.home, key: 'home' },
@@ -48,6 +56,15 @@ export function SiteHeader({
         { href: `/${locale}/about`, label: dict.nav.about, key: 'about' },
         { href: `/${locale}/contact`, label: dict.nav.contact, key: 'contact' },
     ]
+
+    const handleNavClick = (href: string, key: string) => {
+        if (pathname === href) return // Don't navigate if already on the page
+
+        setActiveNav(key)
+        startTransition(() => {
+            router.push(href)
+        })
+    }
 
     const socialLinks = [
         {
@@ -90,18 +107,23 @@ export function SiteHeader({
                     <nav className="hidden lg:flex items-center gap-8">
                         {nav.map((item) => {
                             const Icon = navIcons[item.key as keyof typeof navIcons]
+                            const isLoading = activeNav === item.key && isPending
                             return (
-                                <Link
+                                <button
                                     key={item.href}
-                                    href={item.href}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10 hover:shadow-md border border-transparent hover:border-white/20 ${pathname === item.href
-                                        ? "bg-white/15 shadow-md ring-1 ring-white/20 border-white/30"
-                                        : ""
-                                        }`}
+                                    onClick={() => handleNavClick(item.href, item.key)}
+                                    disabled={isPending}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10 hover:shadow-md border border-transparent hover:border-white/20 relative overflow-hidden ${pathname === item.href
+                                            ? "bg-white/15 shadow-md ring-1 ring-white/20 border-white/30"
+                                            : ""
+                                        } ${isLoading ? "animate-pulse" : ""}`}
                                 >
+                                    {isLoading && (
+                                        <div className="absolute inset-0 border-2 border-green-400 rounded-lg animate-snake-border"></div>
+                                    )}
                                     <Icon size={16} />
                                     {item.label}
-                                </Link>
+                                </button>
                             )
                         })}
                     </nav>
@@ -159,19 +181,26 @@ export function SiteHeader({
                                     <div className="space-y-2">
                                         {nav.map((item) => {
                                             const Icon = navIcons[item.key as keyof typeof navIcons]
+                                            const isLoading = activeNav === item.key && isPending
                                             return (
-                                                <Link
+                                                <button
                                                     key={item.href}
-                                                    href={item.href}
-                                                    onClick={() => setIsOpen(false)}
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${pathname === item.href
-                                                        ? "bg-white/15 shadow-md ring-1 ring-white/20 border border-white/30 text-white"
-                                                        : "hover:bg-white/10 text-gray-200 hover:text-white"
-                                                        }`}
+                                                    onClick={() => {
+                                                        handleNavClick(item.href, item.key)
+                                                        setIsOpen(false)
+                                                    }}
+                                                    disabled={isPending}
+                                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left relative overflow-hidden ${pathname === item.href
+                                                            ? "bg-white/15 shadow-md ring-1 ring-white/20 border border-white/30 text-white"
+                                                            : "hover:bg-white/10 text-gray-200 hover:text-white"
+                                                        } ${isLoading ? "animate-pulse" : ""}`}
                                                 >
+                                                    {isLoading && (
+                                                        <div className="absolute inset-0 border-2 border-green-400 rounded-lg animate-snake-border"></div>
+                                                    )}
                                                     <Icon size={18} />
                                                     {item.label}
-                                                </Link>
+                                                </button>
                                             )
                                         })}
                                     </div>

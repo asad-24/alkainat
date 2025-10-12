@@ -8,8 +8,29 @@ import { LoadingScreen } from "@/components/loading-screen"
 
 export const dynamic = "force-static"
 
-export function generateStaticParams() {
-    return locales.map((locale) => ({ locale }))
+export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }) {
+    const { locale } = await params
+
+    if (!locales.includes(locale)) {
+        return {
+            title: "Al Kainaat Learning & Development Institute",
+            description: "Learn Quran, Arabic, English, and Technology — from anywhere.",
+        }
+    }
+
+    const dict = await getDictionary(locale)
+
+    if (!dict || !dict.site) {
+        return {
+            title: "Al Kainaat Learning & Development Institute",
+            description: "Learn Quran, Arabic, English, and Technology — from anywhere.",
+        }
+    }
+
+    return {
+        title: dict.site.title,
+        description: dict.site.description,
+    }
 }
 
 export default async function LocaleLayout({

@@ -7,8 +7,8 @@ import { getDatabase } from "@/lib/mongodb-alt"
 import type { Locale } from "@/lib/i18n/config"
 import type { Course } from "@/models/types"
 
-// Enable ISR with 5 minute revalidation
-export const revalidate = 300
+// Enable ISR with 15 minute revalidation for better performance
+export const revalidate = 900
 
 async function getFeaturedCourses(): Promise<Course[]> {
     try {
@@ -18,6 +18,20 @@ async function getFeaturedCourses(): Promise<Course[]> {
             .find({})
             .sort({ createdAt: -1 })
             .limit(3)
+            .project({
+                _id: 1,
+                title: 1,
+                description: 1,
+                details: 1,
+                instructor: 1,
+                level: 1,
+                duration: 1,
+                image: 1,
+                interestingStudents: 1,
+                color: 1,
+                createdAt: 1,
+                updatedAt: 1
+            })
             .toArray()
 
         return courses.map(course => ({
@@ -264,18 +278,26 @@ export default async function HomePage({
                     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                         {featuredCourses.map((course, index) => (
                             <article
-                                key={course._id || index}
+                                key={course._id?.toString() || `course-${index}`}
                                 className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300 border border-white/10 group shadow-xl hover:shadow-2xl hover:border-white/20"
                             >
                                 <div className="relative overflow-hidden">
-                                    <Image
-                                        alt={course.title}
-                                        src={course.image || '/placeholder-course.jpg'}
-                                        width={400}
-                                        height={192}
-                                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                        priority={index < 3}
-                                    />
+                                    {course.image && course.image.startsWith('data:') ? (
+                                        <img
+                                            alt={course.title}
+                                            src={course.image}
+                                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                    ) : (
+                                        <Image
+                                            alt={course.title}
+                                            src={course.image || '/placeholder-course.svg'}
+                                            width={400}
+                                            height={192}
+                                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            priority={index < 3}
+                                        />
+                                    )}
                                     <div className="absolute top-4 right-4">
                                         <span
                                             className="text-white px-3 py-1 rounded-full text-sm font-medium"

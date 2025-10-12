@@ -299,17 +299,25 @@ export default function CoursesClient({ dict, initialCourses = [] }: CoursesClie
                         ) : (
                             courses.map((course, index) => (
                                 <article
-                                    key={String(course._id) || course.title}
+                                    key={course._id?.toString() || `course-${index}`}
                                     className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/15 transition-all duration-300 border border-white/20 group"
                                 >
                                     <div className="relative overflow-hidden">
-                                        <Image
-                                            alt={course.title}
-                                            src={course.image || '/placeholder-course.jpg'}
-                                            width={400}
-                                            height={192}
-                                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
+                                        {course.image && course.image.startsWith('data:') ? (
+                                            <img
+                                                alt={course.title}
+                                                src={course.image}
+                                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                        ) : (
+                                            <Image
+                                                alt={course.title}
+                                                src={course.image || '/placeholder-course.svg'}
+                                                width={400}
+                                                height={192}
+                                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                        )}
                                         <div className="absolute top-4 left-4">
                                             <span
                                                 className="text-white px-3 py-1 rounded-full text-sm font-medium"
@@ -395,19 +403,9 @@ export default function CoursesClient({ dict, initialCourses = [] }: CoursesClie
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent className="max-w-4xl h-[85vh] bg-slate-900/95 backdrop-blur-xl border-white/10 overflow-hidden flex flex-col">
                     <DialogHeader className="flex-shrink-0 border-b border-white/10 pb-4">
-                        <div className="flex items-center justify-between">
-                            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                                {selectedCourse?.title}
-                            </DialogTitle>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setIsModalOpen(false)}
-                                className="text-white hover:bg-white/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
+                        <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                            {selectedCourse?.title}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -415,13 +413,21 @@ export default function CoursesClient({ dict, initialCourses = [] }: CoursesClie
                             <>
                                 {/* Course Image */}
                                 <div className="relative rounded-xl overflow-hidden">
-                                    <Image
-                                        src={selectedCourse.image || '/placeholder-course.jpg'}
-                                        alt={selectedCourse.title}
-                                        width={600}
-                                        height={256}
-                                        className="w-full h-64 object-cover"
-                                    />
+                                    {selectedCourse.image && selectedCourse.image.startsWith('data:') ? (
+                                        <img
+                                            src={selectedCourse.image}
+                                            alt={selectedCourse.title}
+                                            className="w-full h-64 object-cover"
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={selectedCourse.image || '/placeholder-course.svg'}
+                                            alt={selectedCourse.title}
+                                            width={600}
+                                            height={256}
+                                            className="w-full h-64 object-cover"
+                                        />
+                                    )}
                                     <div className="absolute top-4 left-4">
                                         <span
                                             className="text-white px-3 py-1 rounded-full text-sm font-medium"

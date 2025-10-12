@@ -5,8 +5,8 @@ import { BookOpen, Users, Globe, Award, Heart, Target, Star, GraduationCap } fro
 import type { Locale } from "@/lib/i18n/config"
 import dynamic from "next/dynamic"
 
-// Enable ISR with 10 minute revalidation for static content
-export const revalidate = 600
+// Enable ISR with 30 minute revalidation for static content
+export const revalidate = 1800
 
 // Dynamically import TeachersGrid to reduce initial bundle size
 const TeachersGrid = dynamic(() => import("@/components/teachers-grid").then(mod => ({ default: mod.TeachersGrid })), {

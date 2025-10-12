@@ -65,7 +65,7 @@ export function TeachersGrid({
                         <div className="relative overflow-hidden">
                             <Image
                                 alt={teacher.name}
-                                src={teacher.avatar || '/placeholder-teacher.jpg'}
+                                src={teacher.avatar || '/placeholder-teacher.svg'}
                                 width={400}
                                 height={192}
                                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -115,19 +115,9 @@ export function TeachersGrid({
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent className="max-w-4xl h-[85vh] bg-slate-900/95 backdrop-blur-xl border-white/10 overflow-hidden flex flex-col">
                     <DialogHeader className="flex-shrink-0 border-b border-white/10 pb-4">
-                        <div className="flex items-center justify-between">
-                            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                                {selectedTeacher?.name}
-                            </DialogTitle>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setIsModalOpen(false)}
-                                className="text-white hover:bg-white/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
+                        <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                            {selectedTeacher?.name}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -136,7 +126,7 @@ export function TeachersGrid({
                                 {/* Teacher Image */}
                                 <div className="relative rounded-xl overflow-hidden">
                                     <Image
-                                        src={selectedTeacher.avatar || '/placeholder-teacher.jpg'}
+                                        src={selectedTeacher.avatar || '/placeholder-teacher.svg'}
                                         alt={selectedTeacher.name}
                                         width={600}
                                         height={256}

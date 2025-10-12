@@ -1,4 +1,8 @@
 const en = {
+    site: {
+        title: "Al Kainaat Learning & Development Institute",
+        description: "Learn Quran, Arabic, English, and Technology — from anywhere. Online platform for learners worldwide with expert teachers.",
+    },
     nav: { home: "Home", courses: "Courses", about: "About Us", contact: "Contact" },
     hero: {
         title: "Learn Quran, Arabic, English, and Technology — from anywhere",

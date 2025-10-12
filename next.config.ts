@@ -25,6 +25,7 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     scrollRestoration: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 
   // Webpack optimizations

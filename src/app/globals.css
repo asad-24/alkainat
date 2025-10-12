@@ -724,3 +724,28 @@
 .animate-spin-reverse {
   animation: spin-reverse 3s linear infinite;
 }
+
+/* Navigation Loading Animation */
+@keyframes snake-border {
+  0% {
+    clip-path: inset(0 100% 100% 0);
+  }
+  25% {
+    clip-path: inset(0 0 100% 0);
+  }
+  50% {
+    clip-path: inset(0 0 0 100%);
+  }
+  75% {
+    clip-path: inset(100% 0 0 0);
+  }
+  100% {
+    clip-path: inset(0 100% 100% 0);
+  }
+}
+
+.animate-snake-border {
+  animation: snake-border 2s linear infinite;
+  background: linear-gradient(90deg, transparent, #22c55e, transparent);
+  background-size: 200% 100%;
+}

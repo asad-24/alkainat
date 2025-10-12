@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { connectToDatabase } from '@/lib/db';
+import { getDatabase } from '@/lib/mongodb-alt';
+import { requireAdmin } from '@/lib/auth-utils';
 import { ObjectId } from 'mongodb';
 
 export async function PUT(request: NextRequest) {
     try {
-        const session = await getServerSession();
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        // Check admin authentication
+        requireAdmin(request);
 
         const { courseId, title, description, details, instructor, level, duration, image, interestingStudents, color } = await request.json();
 
@@ -16,15 +14,7 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const { db } = await connectToDatabase();
-        const adminsCollection = db.collection('admins');
-
-        // Verify admin exists
-        const admin = await adminsCollection.findOne({ email: session.user.email });
-        if (!admin) {
-            return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
-        }
-
+        const db = await getDatabase();
         const coursesCollection = db.collection('courses');
 
         const updateData = {
@@ -51,6 +41,10 @@ export async function PUT(request: NextRequest) {
 
         // Fetch the updated course
         const updatedCourse = await coursesCollection.findOne({ _id: new ObjectId(courseId) });
+
+        if (!updatedCourse) {
+            return NextResponse.json({ error: 'Course not found after update' }, { status: 404 });
+        }
 
         return NextResponse.json({
             success: true,
