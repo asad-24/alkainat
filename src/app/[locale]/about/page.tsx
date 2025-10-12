@@ -1,9 +1,17 @@
 import { getDictionary } from "@/lib/i18n/get-dictionary"
-import { TeachersGrid } from "@/components/teachers-grid"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BookOpen, Users, Globe, Award, Heart, Target, Star, GraduationCap } from "lucide-react"
 import type { Locale } from "@/lib/i18n/config"
+import dynamic from "next/dynamic"
+
+// Enable ISR with 10 minute revalidation for static content
+export const revalidate = 600
+
+// Dynamically import TeachersGrid to reduce initial bundle size
+const TeachersGrid = dynamic(() => import("@/components/teachers-grid").then(mod => ({ default: mod.TeachersGrid })), {
+    loading: () => <div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>
+})
 
 export default async function AboutPage({
     params,

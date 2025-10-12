@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Users, Clock, Globe, Star, ChevronRight, Sparkles, Zap } from "lucide-react"
@@ -6,7 +7,8 @@ import { getDatabase } from "@/lib/mongodb-alt"
 import type { Locale } from "@/lib/i18n/config"
 import type { Course } from "@/models/types"
 
-export const dynamic = 'force-dynamic'
+// Enable ISR with 5 minute revalidation
+export const revalidate = 300
 
 async function getFeaturedCourses(): Promise<Course[]> {
     try {
@@ -266,10 +268,13 @@ export default async function HomePage({
                                 className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300 border border-white/10 group shadow-xl hover:shadow-2xl hover:border-white/20"
                             >
                                 <div className="relative overflow-hidden">
-                                    <img
+                                    <Image
                                         alt={course.title}
                                         src={course.image || '/placeholder-course.jpg'}
+                                        width={400}
+                                        height={192}
                                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                        priority={index < 3}
                                     />
                                     <div className="absolute top-4 right-4">
                                         <span

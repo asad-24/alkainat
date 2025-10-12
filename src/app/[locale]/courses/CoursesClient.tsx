@@ -6,21 +6,39 @@ import { Clock, Users, Star, BookOpen, ChevronRight, Award, Play, Heart, X } fro
 import type { Course } from "@/models/types"
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import Image from "next/image"
 
 interface CoursesClientProps {
     dict: any
+    initialCourses?: Course[]
 }
 
-export default function CoursesClient({ dict }: CoursesClientProps) {
-    const [courses, setCourses] = useState<Course[]>([])
-    const [loading, setLoading] = useState(true)
+export default function CoursesClient({ dict, initialCourses = [] }: CoursesClientProps) {
+    const [courses, setCourses] = useState<Course[]>(initialCourses)
+    const [loading, setLoading] = useState(initialCourses.length === 0)
     const [error, setError] = useState<string | null>(null)
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [interestingCounts, setInterestingCounts] = useState<Record<string, number>>({})
     const [likedCourses, setLikedCourses] = useState<Set<string>>(new Set())
+    const [heartLoading, setHeartLoading] = useState<Set<string>>(new Set())
 
     useEffect(() => {
+        // Only fetch if we don't have initial courses
+        if (initialCourses.length > 0) {
+            // Initialize liked courses from localStorage if available
+            const saved = localStorage.getItem('likedCourses')
+            if (saved) {
+                try {
+                    const liked = JSON.parse(saved)
+                    setLikedCourses(new Set(liked))
+                } catch (e) {
+                    // Ignore invalid data
+                }
+            }
+            setLoading(false)
+            return
+        }
+
         const fetchCourses = async () => {
             try {
                 const response = await fetch('/api/courses/public')
@@ -30,12 +48,16 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                 const data = await response.json()
                 if (data.success) {
                     setCourses(data.courses)
-                    // Initialize interesting counts
-                    const counts: Record<string, number> = {}
-                    data.courses.forEach((course: Course) => {
-                        counts[String(course._id)] = course.interestingStudents || 0
-                    })
-                    setInterestingCounts(counts)
+                    // Initialize liked courses from localStorage
+                    const saved = localStorage.getItem('likedCourses')
+                    if (saved) {
+                        try {
+                            const liked = JSON.parse(saved)
+                            setLikedCourses(new Set(liked))
+                        } catch (e) {
+                            // Ignore invalid data
+                        }
+                    }
                 } else {
                     throw new Error(data.error || 'Failed to fetch courses')
                 }
@@ -48,11 +70,17 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
         }
 
         fetchCourses()
-    }, [])
+    }, [initialCourses])
 
     const handleHeartClick = async (courseId: string) => {
+        // Prevent multiple clicks while processing
+        if (heartLoading.has(courseId)) return
+
         const isCurrentlyLiked = likedCourses.has(courseId)
         const action = isCurrentlyLiked ? 'decrement' : 'increment'
+
+        // Add to loading state
+        setHeartLoading(prev => new Set(prev).add(courseId))
 
         try {
             const response = await fetch('/api/courses/interesting', {
@@ -65,10 +93,6 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
 
             if (response.ok) {
                 const data = await response.json()
-                setInterestingCounts(prev => ({
-                    ...prev,
-                    [courseId]: data.interestingStudents
-                }))
                 setLikedCourses(prev => {
                     const newSet = new Set(prev)
                     if (isCurrentlyLiked) {
@@ -76,11 +100,20 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                     } else {
                         newSet.add(courseId)
                     }
+                    // Save to localStorage
+                    localStorage.setItem('likedCourses', JSON.stringify([...newSet]))
                     return newSet
                 })
             }
         } catch (error) {
             console.error('Error updating interesting count:', error)
+        } finally {
+            // Remove from loading state
+            setHeartLoading(prev => {
+                const newSet = new Set(prev)
+                newSet.delete(courseId)
+                return newSet
+            })
         }
     }
 
@@ -270,9 +303,11 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                                     className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/15 transition-all duration-300 border border-white/20 group"
                                 >
                                     <div className="relative overflow-hidden">
-                                        <img
+                                        <Image
                                             alt={course.title}
                                             src={course.image || '/placeholder-course.jpg'}
+                                            width={400}
+                                            height={192}
                                             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                         <div className="absolute top-4 left-4">
@@ -286,10 +321,11 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                                         <div className="absolute top-4 right-4 flex gap-2">
                                             <button
                                                 onClick={() => handleHeartClick(String(course._id))}
+                                                disabled={heartLoading.has(String(course._id))}
                                                 className={`rounded-full p-2 transition-colors group ${likedCourses.has(String(course._id))
                                                     ? 'bg-red-500/20'
                                                     : 'bg-white/20 hover:bg-red-500/20'
-                                                    }`}
+                                                    } ${heartLoading.has(String(course._id)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
                                                 <Heart className={`h-4 w-4 transition-colors ${likedCourses.has(String(course._id))
                                                     ? 'text-red-400 fill-red-400'
@@ -306,10 +342,6 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                                             <div className="flex items-center text-gray-400 text-sm">
                                                 <Clock className="h-4 w-4 mr-1" />
                                                 {course.duration}
-                                            </div>
-                                            <div className="flex items-center text-gray-400 text-sm">
-                                                <Heart className="h-4 w-4 mr-1 text-red-400" />
-                                                {interestingCounts[String(course._id)] ?? course.interestingStudents ?? 0} Interested
                                             </div>
                                         </div>
 
@@ -383,9 +415,11 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                             <>
                                 {/* Course Image */}
                                 <div className="relative rounded-xl overflow-hidden">
-                                    <img
+                                    <Image
                                         src={selectedCourse.image || '/placeholder-course.jpg'}
                                         alt={selectedCourse.title}
+                                        width={600}
+                                        height={256}
                                         className="w-full h-64 object-cover"
                                     />
                                     <div className="absolute top-4 left-4">
@@ -413,15 +447,6 @@ export default function CoursesClient({ dict }: CoursesClientProps) {
                                             <span className="font-medium">Duration</span>
                                         </div>
                                         <p className="text-white font-semibold">{selectedCourse.duration}</p>
-                                    </div>
-                                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                                        <div className="flex items-center text-gray-300 mb-2">
-                                            <Heart className="h-5 w-5 mr-2 text-red-400" />
-                                            <span className="font-medium">Interested Students</span>
-                                        </div>
-                                        <p className="text-white font-semibold">
-                                            {interestingCounts[String(selectedCourse._id)] ?? selectedCourse.interestingStudents ?? 0}
-                                        </p>
                                     </div>
                                 </div>
 

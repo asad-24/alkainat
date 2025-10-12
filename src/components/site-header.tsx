@@ -144,10 +144,10 @@ export function SiteHeader({
                                     <span className="sr-only">Open menu</span>
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="right" className="w-[300px] sm:w-[350px]">
+                            <SheetContent side="right" className="w-[300px] sm:w-[350px] bg-gradient-to-b from-black/95 via-gray-800/95 to-black/95 text-white border-l border-white/20">
                                 <SheetHeader>
-                                    <SheetTitle className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-lg bg-[linear-gradient(45deg,var(--brand-start),var(--chart-2))] flex items-center justify-center">
+                                    <SheetTitle className="flex items-center gap-3 text-white">
+                                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg">
                                             <span className="text-sm font-bold text-white">AK</span>
                                         </div>
                                         Al Kainaat LDI
@@ -164,9 +164,9 @@ export function SiteHeader({
                                                     key={item.href}
                                                     href={item.href}
                                                     onClick={() => setIsOpen(false)}
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${pathname === item.href
-                                                        ? "bg-[var(--chart-2)] text-white"
-                                                        : "hover:bg-accent"
+                                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${pathname === item.href
+                                                        ? "bg-white/15 shadow-md ring-1 ring-white/20 border border-white/30 text-white"
+                                                        : "hover:bg-white/10 text-gray-200 hover:text-white"
                                                         }`}
                                                 >
                                                     <Icon size={18} />
@@ -180,7 +180,7 @@ export function SiteHeader({
 
                                     {/* Social Links in Mobile */}
                                     <div className="space-y-2">
-                                        <h4 className="text-sm font-semibold text-muted-foreground px-4">Follow Us</h4>
+                                        <h4 className="text-sm font-semibold text-gray-300 px-4">Follow Us</h4>
                                         <div className="grid grid-cols-2 gap-2">
                                             {socialLinks.map((social) => {
                                                 const Icon = social.icon
@@ -190,7 +190,7 @@ export function SiteHeader({
                                                         href={social.href}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
+                                                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all duration-200 text-gray-200 hover:text-white"
                                                     >
                                                         <Icon size={18} />
                                                         <span className="text-sm">{social.label}</span>

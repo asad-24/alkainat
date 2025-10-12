@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Star, Users, BookOpen, Award } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import Image from "next/image"
 import type { Locale } from "@/lib/i18n/config"
 import type { Teacher } from "@/models/types"
 
@@ -62,9 +63,11 @@ export function TeachersGrid({
                         onClick={() => openTeacherModal(teacher)}
                     >
                         <div className="relative overflow-hidden">
-                            <img
+                            <Image
                                 alt={teacher.name}
                                 src={teacher.avatar || '/placeholder-teacher.jpg'}
+                                width={400}
+                                height={192}
                                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                             <div className="absolute top-4 right-4">
@@ -132,9 +135,11 @@ export function TeachersGrid({
                             <>
                                 {/* Teacher Image */}
                                 <div className="relative rounded-xl overflow-hidden">
-                                    <img
+                                    <Image
                                         src={selectedTeacher.avatar || '/placeholder-teacher.jpg'}
                                         alt={selectedTeacher.name}
+                                        width={600}
+                                        height={256}
                                         className="w-full h-64 object-cover"
                                     />
                                     <div className="absolute top-4 left-4">
