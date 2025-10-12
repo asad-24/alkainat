@@ -4,25 +4,51 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Clock, Users, Star, BookOpen, ChevronRight, Award, Play, Heart, X } from "lucide-react"
 import type { Course } from "@/models/types"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface CoursesClientProps {
-    courses: Course[]
     dict: any
 }
 
-export default function CoursesClient({ courses, dict }: CoursesClientProps) {
+export default function CoursesClient({ dict }: CoursesClientProps) {
+    const [courses, setCourses] = useState<Course[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [interestingCounts, setInterestingCounts] = useState<Record<string, number>>(() => {
-        const counts: Record<string, number> = {}
-        courses.forEach(course => {
-            counts[String(course._id)] = course.interestingStudents || 0
-        })
-        return counts
-    })
+    const [interestingCounts, setInterestingCounts] = useState<Record<string, number>>({})
     const [likedCourses, setLikedCourses] = useState<Set<string>>(new Set())
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await fetch('/api/courses/public')
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses')
+                }
+                const data = await response.json()
+                if (data.success) {
+                    setCourses(data.courses)
+                    // Initialize interesting counts
+                    const counts: Record<string, number> = {}
+                    data.courses.forEach((course: Course) => {
+                        counts[String(course._id)] = course.interestingStudents || 0
+                    })
+                    setInterestingCounts(counts)
+                } else {
+                    throw new Error(data.error || 'Failed to fetch courses')
+                }
+            } catch (err) {
+                console.error('Error fetching courses:', err)
+                setError(err instanceof Error ? err.message : 'Failed to fetch courses')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchCourses()
+    }, [])
 
     const handleHeartClick = async (courseId: string) => {
         const isCurrentlyLiked = likedCourses.has(courseId)
@@ -206,68 +232,101 @@ export default function CoursesClient({ courses, dict }: CoursesClientProps) {
                     </div>
 
                     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                        {courses.map((course, index) => (
-                            <article
-                                key={String(course._id) || course.title}
-                                className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/15 transition-all duration-300 border border-white/20 group"
-                            >
-                                <div className="relative overflow-hidden">
-                                    <img
-                                        alt={course.title}
-                                        src={course.image || '/placeholder-course.jpg'}
-                                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        <span
-                                            className="text-white px-3 py-1 rounded-full text-sm font-medium"
-                                            style={{ backgroundColor: course.color }}
-                                        >
-                                            {course.level}
-                                        </span>
-                                    </div>
-                                    <div className="absolute top-4 right-4 flex gap-2">
-                                        <button
-                                            onClick={() => handleHeartClick(String(course._id))}
-                                            className={`rounded-full p-2 transition-colors group ${likedCourses.has(String(course._id))
-                                                ? 'bg-red-500/20'
-                                                : 'bg-white/20 hover:bg-red-500/20'
-                                                }`}
-                                        >
-                                            <Heart className={`h-4 w-4 transition-colors ${likedCourses.has(String(course._id))
-                                                ? 'text-red-400 fill-red-400'
-                                                : 'text-white group-hover:text-red-400'
-                                                }`} />
-                                        </button>
-                                    </div>
+                        {loading ? (
+                            <div className="col-span-full flex justify-center items-center py-12">
+                                <div className="text-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                                    <p className="text-white/70">Loading courses...</p>
                                 </div>
-                                <div className="p-6">
-                                    <h3 className="text-xl font-semibold text-white mb-3">{course.title}</h3>
-                                    <p className="text-gray-300 mb-4 leading-relaxed truncate">{course.description}</p>
-
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center text-gray-400 text-sm">
-                                            <Clock className="h-4 w-4 mr-1" />
-                                            {course.duration}
-                                        </div>
-                                        <div className="flex items-center text-gray-400 text-sm">
-                                            <Heart className="h-4 w-4 mr-1 text-red-400" />
-                                            {interestingCounts[String(course._id)] ?? course.interestingStudents ?? 0} Interested
-                                        </div>
+                            </div>
+                        ) : error ? (
+                            <div className="col-span-full flex justify-center items-center py-12">
+                                <div className="text-center">
+                                    <div className="text-red-400 mb-4">
+                                        <X className="h-12 w-12 mx-auto mb-2" />
+                                        <p className="text-lg font-semibold">Failed to load courses</p>
                                     </div>
-
-                                    <div className="flex gap-3">
-                                        <Button
-                                            onClick={() => openCourseModal(course)}
-                                            variant="ghost"
-                                            size="sm"
-                                            className="flex-1 text-white hover:bg-white/10 border border-white/20"
-                                        >
-                                            Learn More
-                                        </Button>
-                                    </div>
+                                    <p className="text-white/70 mb-4">{error}</p>
+                                    <Button
+                                        onClick={() => window.location.reload()}
+                                        className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                                    >
+                                        Try Again
+                                    </Button>
                                 </div>
-                            </article>
-                        ))}
+                            </div>
+                        ) : courses.length === 0 ? (
+                            <div className="col-span-full flex justify-center items-center py-12">
+                                <div className="text-center">
+                                    <BookOpen className="h-12 w-12 text-white/50 mx-auto mb-4" />
+                                    <p className="text-white/70 text-lg">No courses available at the moment</p>
+                                    <p className="text-white/50 text-sm mt-2">Please check back later</p>
+                                </div>
+                            </div>
+                        ) : (
+                            courses.map((course, index) => (
+                                <article
+                                    key={String(course._id) || course.title}
+                                    className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-white/15 transition-all duration-300 border border-white/20 group"
+                                >
+                                    <div className="relative overflow-hidden">
+                                        <img
+                                            alt={course.title}
+                                            src={course.image || '/placeholder-course.jpg'}
+                                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                        <div className="absolute top-4 left-4">
+                                            <span
+                                                className="text-white px-3 py-1 rounded-full text-sm font-medium"
+                                                style={{ backgroundColor: course.color }}
+                                            >
+                                                {course.level}
+                                            </span>
+                                        </div>
+                                        <div className="absolute top-4 right-4 flex gap-2">
+                                            <button
+                                                onClick={() => handleHeartClick(String(course._id))}
+                                                className={`rounded-full p-2 transition-colors group ${likedCourses.has(String(course._id))
+                                                    ? 'bg-red-500/20'
+                                                    : 'bg-white/20 hover:bg-red-500/20'
+                                                    }`}
+                                            >
+                                                <Heart className={`h-4 w-4 transition-colors ${likedCourses.has(String(course._id))
+                                                    ? 'text-red-400 fill-red-400'
+                                                    : 'text-white group-hover:text-red-400'
+                                                    }`} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-white mb-3">{course.title}</h3>
+                                        <p className="text-gray-300 mb-4 leading-relaxed truncate">{course.description}</p>
+
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center text-gray-400 text-sm">
+                                                <Clock className="h-4 w-4 mr-1" />
+                                                {course.duration}
+                                            </div>
+                                            <div className="flex items-center text-gray-400 text-sm">
+                                                <Heart className="h-4 w-4 mr-1 text-red-400" />
+                                                {interestingCounts[String(course._id)] ?? course.interestingStudents ?? 0} Interested
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <Button
+                                                onClick={() => openCourseModal(course)}
+                                                variant="ghost"
+                                                size="sm"
+                                                className="flex-1 text-white hover:bg-white/10 border border-white/20"
+                                            >
+                                                Learn More
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </article>
+                            )))
+                        }
                     </div>
                 </div>
             </section>
