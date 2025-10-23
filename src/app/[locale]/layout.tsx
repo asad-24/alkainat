@@ -5,6 +5,7 @@ import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { LoadingScreen } from "@/components/loading-screen"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 
 export const dynamic = "force-static"
 
@@ -51,6 +52,7 @@ export default async function LocaleLayout({
             <SiteHeader locale={locale} dict={dict} />
             <main className="flex-1">{children}</main>
             <SiteFooter locale={locale} dict={dict} />
+            <WhatsAppButton />
         </div>
     )
 }

@@ -6,10 +6,16 @@ import { ObjectId } from 'mongodb';
 
 export async function DELETE(req: NextRequest) {
     try {
-        // Check admin authentication
-        requireAdmin(req);
+        console.log('Starting course delete operation...');
 
-        const { courseId } = await req.json();
+        // Check admin authentication
+        const admin = requireAdmin(req);
+        console.log('Admin authenticated:', !!admin);
+
+        const body = await req.json();
+        const { courseId } = body;
+
+        console.log('Delete course request:', { courseId, type: typeof courseId });
 
         if (!courseId) {
             return NextResponse.json(
@@ -20,8 +26,9 @@ export async function DELETE(req: NextRequest) {
 
         // Validate ObjectId format
         if (!ObjectId.isValid(courseId)) {
+            console.log('Invalid ObjectId format:', courseId);
             return NextResponse.json(
-                { error: 'Invalid course ID format' },
+                { error: `Invalid course ID format: ${courseId}` },
                 { status: 400 }
             );
         }
@@ -33,6 +40,8 @@ export async function DELETE(req: NextRequest) {
         const course = await coursesCollection.findOne({
             _id: new ObjectId(courseId)
         });
+
+        console.log('Course found:', !!course, course?._id);
 
         if (!course) {
             return NextResponse.json(
@@ -46,12 +55,20 @@ export async function DELETE(req: NextRequest) {
             _id: new ObjectId(courseId)
         });
 
+        console.log('Delete result:', result);
+
         if (result.deletedCount === 0) {
             return NextResponse.json(
-                { error: 'Failed to delete course' },
+                { error: 'Failed to delete course - no documents deleted' },
                 { status: 500 }
             );
         }
+
+        // Verify deletion
+        const verifyDelete = await coursesCollection.findOne({
+            _id: new ObjectId(courseId)
+        });
+        console.log('Verification - course still exists:', !!verifyDelete);
 
         return NextResponse.json({
             success: true,
@@ -73,7 +90,7 @@ export async function DELETE(req: NextRequest) {
         }
 
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` },
             { status: 500 }
         );
     }

@@ -86,7 +86,7 @@ export function SiteHeader({
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16 gap-4">
                     {/* Logo */}
-                    <Link href={`/${locale}`} className="flex items-center gap-3 hover:opacity-90 transition-opacity group">
+                    <Link href={`/${locale}`} className="flex items-center gap-3 hover:opacity-90 transition-opacity group cursor-pointer">
                         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-300">
                             <span className="sr-only">Al Kainaat Learning & Development Institute</span>
                             <span aria-hidden className="text-lg font-bold text-white">
@@ -113,9 +113,9 @@ export function SiteHeader({
                                     key={item.href}
                                     onClick={() => handleNavClick(item.href, item.key)}
                                     disabled={isPending}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10 hover:shadow-md border border-transparent hover:border-white/20 relative overflow-hidden ${pathname === item.href
-                                            ? "bg-white/15 shadow-md ring-1 ring-white/20 border-white/30"
-                                            : ""
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10 hover:shadow-md border border-transparent hover:border-white/20 relative overflow-hidden cursor-pointer ${pathname === item.href
+                                        ? "bg-white/15 shadow-md ring-1 ring-white/20 border-white/30"
+                                        : ""
                                         } ${isLoading ? "animate-pulse" : ""}`}
                                 >
                                     {isLoading && (
@@ -141,7 +141,7 @@ export function SiteHeader({
                                         target="_blank"
                                         rel="noreferrer"
                                         aria-label={social.label}
-                                        className="p-2 rounded-lg hover:bg-white/15 transition-all duration-200 hover:text-white"
+                                        className="p-2 rounded-lg hover:bg-white/15 transition-all duration-200 hover:text-white cursor-pointer"
                                     >
                                         <Icon size={18} />
                                     </a>
@@ -190,9 +190,9 @@ export function SiteHeader({
                                                         setIsOpen(false)
                                                     }}
                                                     disabled={isPending}
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left relative overflow-hidden ${pathname === item.href
-                                                            ? "bg-white/15 shadow-md ring-1 ring-white/20 border border-white/30 text-white"
-                                                            : "hover:bg-white/10 text-gray-200 hover:text-white"
+                                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left relative overflow-hidden cursor-pointer ${pathname === item.href
+                                                        ? "bg-white/15 shadow-md ring-1 ring-white/20 border border-white/30 text-white"
+                                                        : "hover:bg-white/10 text-gray-200 hover:text-white"
                                                         } ${isLoading ? "animate-pulse" : ""}`}
                                                 >
                                                     {isLoading && (
@@ -219,7 +219,7 @@ export function SiteHeader({
                                                         href={social.href}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all duration-200 text-gray-200 hover:text-white"
+                                                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all duration-200 text-gray-200 hover:text-white cursor-pointer"
                                                     >
                                                         <Icon size={18} />
                                                         <span className="text-sm">{social.label}</span>

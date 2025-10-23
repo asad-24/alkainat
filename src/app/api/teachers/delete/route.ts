@@ -6,10 +6,16 @@ import { ObjectId } from 'mongodb';
 
 export async function DELETE(req: NextRequest) {
     try {
-        // Check admin authentication
-        requireAdmin(req);
+        console.log('Starting teacher delete operation...');
 
-        const { teacherId } = await req.json();
+        // Check admin authentication
+        const admin = requireAdmin(req);
+        console.log('Admin authenticated:', !!admin);
+
+        const body = await req.json();
+        const { teacherId } = body;
+
+        console.log('Delete teacher request:', { teacherId, type: typeof teacherId });
 
         if (!teacherId) {
             return NextResponse.json(
@@ -20,8 +26,9 @@ export async function DELETE(req: NextRequest) {
 
         // Validate ObjectId format
         if (!ObjectId.isValid(teacherId)) {
+            console.log('Invalid ObjectId format:', teacherId);
             return NextResponse.json(
-                { error: 'Invalid teacher ID format' },
+                { error: `Invalid teacher ID format: ${teacherId}` },
                 { status: 400 }
             );
         }
@@ -33,6 +40,8 @@ export async function DELETE(req: NextRequest) {
         const teacher = await teachersCollection.findOne({
             _id: new ObjectId(teacherId)
         });
+
+        console.log('Teacher found:', !!teacher, teacher?._id);
 
         if (!teacher) {
             return NextResponse.json(
@@ -46,12 +55,20 @@ export async function DELETE(req: NextRequest) {
             _id: new ObjectId(teacherId)
         });
 
+        console.log('Delete result:', result);
+
         if (result.deletedCount === 0) {
             return NextResponse.json(
-                { error: 'Failed to delete teacher' },
+                { error: 'Failed to delete teacher - no documents deleted' },
                 { status: 500 }
             );
         }
+
+        // Verify deletion
+        const verifyDelete = await teachersCollection.findOne({
+            _id: new ObjectId(teacherId)
+        });
+        console.log('Verification - teacher still exists:', !!verifyDelete);
 
         return NextResponse.json({
             success: true,
@@ -73,7 +90,7 @@ export async function DELETE(req: NextRequest) {
         }
 
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` },
             { status: 500 }
         );
     }
