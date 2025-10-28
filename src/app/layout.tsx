@@ -16,6 +16,9 @@ const GeistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Education Portal',
   description: 'An online education platform offering courses, resources, and tools for learners and educators.',
+  icons: {
+    icon: '/alkainaticon.png',
+  },
 };
 
 // Analytics component (you can create this later or remove if not needed)

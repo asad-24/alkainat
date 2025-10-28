@@ -68,13 +68,13 @@ export function SiteHeader({
 
     const socialLinks = [
         {
-            href: "https://facebook.com",
+            href: "https://www.facebook.com/alkainaat",
             icon: Facebook,
             label: "Facebook",
             color: "hover:text-blue-600"
         },
         {
-            href: "https://instagram.com",
+            href: "https://www.instagram.com/al_kainaat/",
             icon: Instagram,
             label: "Instagram",
             color: "hover:text-pink-600"
@@ -87,12 +87,11 @@ export function SiteHeader({
                 <div className="flex items-center justify-between h-16 gap-4">
                     {/* Logo */}
                     <Link href={`/${locale}`} className="flex items-center gap-3 hover:opacity-90 transition-opacity group cursor-pointer">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-300">
-                            <span className="sr-only">Al Kainaat Learning & Development Institute</span>
-                            <span aria-hidden className="text-lg font-bold text-white">
-                                AK
-                            </span>
-                        </div>
+                        <img
+                            src="/alkainaticon.png"
+                            alt="Al Kainaat Learning & Development Institute"
+                            className="h-12 w-12 rounded-xl object-cover shadow-lg group-hover:scale-105 transition-all duration-300"
+                        />
                         <div className="leading-tight hidden sm:block">
                             <div className="text-base font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Al Kainaat</div>
                             <div className="text-xs opacity-80 font-medium text-gray-300">Learning & Development Institute</div>
@@ -169,9 +168,11 @@ export function SiteHeader({
                             <SheetContent side="right" className="w-[300px] sm:w-[350px] bg-gradient-to-b from-black/95 via-gray-800/95 to-black/95 text-white border-l border-white/20">
                                 <SheetHeader>
                                     <SheetTitle className="flex items-center gap-3 text-white">
-                                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg">
-                                            <span className="text-sm font-bold text-white">AK</span>
-                                        </div>
+                                        <img
+                                            src="/alkainaticon.png"
+                                            alt="Al Kainaat"
+                                            className="h-8 w-8 rounded-lg object-cover shadow-lg"
+                                        />
                                         Al Kainaat LDI
                                     </SheetTitle>
                                 </SheetHeader>

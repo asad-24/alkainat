@@ -45,7 +45,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 gap-2 px-2 text-current hover:bg-primary/15"
+                    className="h-8 gap-2 px-2 text-current hover:bg-white cursor-pointer"
                 >
                     <Globe size={16} />
                     <span className="hidden sm:inline">
@@ -62,7 +62,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
                     <DropdownMenuItem
                         key={l}
                         onClick={() => switchTo(l)}
-                        className={`flex items-center gap-3 cursor-pointer ${l === locale ? "bg-accent" : ""
+                        className={`flex items-center gap-3 cursor-pointer ${l === locale ? "bg-black text-white hover:bg-gray-800 hover:text-white" : ""
                             }`}
                     >
                         <span className="text-lg">{languageFlags[l]}</span>
